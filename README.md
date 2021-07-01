@@ -22,3 +22,13 @@ create table ingredients(
 	  REFERENCES recipes(id)
 )
 ```
+
+.env file contents if above docekr command is used
+```
+PG_USERNAME = admin
+PG_PASSWORD = admin
+POSTGRES_DB = demo
+PG_HOST = 127.0.0.1
+PG_PORT = 32772
+APP_PORT = 3000
+```
