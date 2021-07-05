@@ -1,7 +1,7 @@
 import Knex from "knex";
 import config from "../config";
-import knexConf from "../../knexfile.js";
-import { rejects } from "assert";
+//import knexConf from "../../knexfile.js";
+//import { rejects } from "assert";
 
 export class KnexDB {
   db!: Knex;
