@@ -1,7 +1,6 @@
 import app from "./app";
 
-app
-  .init()
+app.init()
   .then(() => {
     app.listen();
     console.log("Boot successful!");

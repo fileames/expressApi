@@ -14,11 +14,7 @@ class RecipeController extends BaseController {
     this.recipeService = new RecipeService();
   }
 
-  listRecipes(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) {
+  listRecipes(req: express.Request, res: express.Response, next: express.NextFunction) {
     this.recipeService
       .listRecipes()
       .then((list) => {
@@ -29,12 +25,10 @@ class RecipeController extends BaseController {
       });
   }
 
-  addRecipe(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) {
+  addRecipe(req: express.Request, res: express.Response, next: express.NextFunction) {
+
     const { body } = req;
+
     schemas.validateRecipe
       .validateAsync(body)
       .then((validatedRecipe) => {
@@ -47,30 +41,80 @@ class RecipeController extends BaseController {
           .catch((err) => {
             next(err);
           });
+
       })
       .catch((err: Joi.ValidationError) => {
         next(new ValidationError(err.message));
       });
   }
 
-  getRecipe(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-  ) {
+  getRecipe(req: express.Request, res: express.Response, next: express.NextFunction) {
+
     const recipe_id = req.params.recipe_id;
+
     schemas.validateRecipeId
       .validateAsync(recipe_id)
       .then((validatedId) => {
-
         this.recipeService
           .getRecipeById(validatedId)
           .then((recipe) => {
-            return res.status(201).send(recipe);
+            return res.status(200).send(recipe);
+          })
+          .catch((err) => {
+            console.log("ERR")
+            console.log(err)
+            next(err);
+          });
+      })
+      .catch((err: Joi.ValidationError) => {
+        next(new ValidationError(err.message));
+      });
+  }
+
+  deleteRecipe(req: express.Request, res: express.Response, next: express.NextFunction) {
+
+    const recipe_id = req.params.recipe_id;
+
+    schemas.validateRecipeId
+      .validateAsync(recipe_id)
+      .then((validatedId) => {
+        this.recipeService
+          .deleteRecipeById(validatedId)
+          .then((_) => {
+            return res.status(204).send();
           })
           .catch((err) => {
             next(err);
           });
+      })
+      .catch((err: Joi.ValidationError) => {
+        next(new ValidationError(err.message));
+      });
+  }
+
+  updateRecipe(req: express.Request, res: express.Response, next: express.NextFunction) {
+
+    const recipe_id = req.params.recipe_id;
+    const { body } = req;
+
+    console.log(recipe_id)
+    console.log(body)
+
+    schemas.validateUpdateRecipe
+      .validateAsync(body)
+      .then((validatedRecipe) => {
+        schemas.validateRecipeId.validateAsync(recipe_id)
+        .then((validatedId) => {
+            this.recipeService
+              .updateRecipe(validatedId, validatedRecipe)
+              .then((recipe) => {
+                return res.status(200).send(recipe);
+              })
+              .catch((err) => {
+                next(err);
+              });
+        })
+        
       })
       .catch((err: Joi.ValidationError) => {
         next(new ValidationError(err.message));
@@ -82,6 +126,8 @@ class RecipeController extends BaseController {
     this.router.get("/", this.listRecipes.bind(this));
     this.router.post("/", this.addRecipe.bind(this));
     this.router.get("/:recipe_id", this.getRecipe.bind(this));
+    this.router.delete("/:recipe_id", this.deleteRecipe.bind(this));
+    this.router.patch("/:recipe_id", this.updateRecipe.bind(this))
   }
 }
 

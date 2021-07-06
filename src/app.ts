@@ -38,17 +38,17 @@ class RecipeApp {
     const apiPath: string = "/api";
     this.app.use(apiPath, this.appRouter);
     this.appRouter.use("/recipes", recipeController);
-
-    //console.log(this.app._router.stack);
   }
 
   listen(): Promise<boolean> {
     return new Promise((resolve, reject) => {
+
       const port = Number(process.env.APP_PORT || 3000);
       this.app.listen(port, () => {
         console.log("Express server started on port: " + port);
         resolve(true);
       });
+
     });
   }
 

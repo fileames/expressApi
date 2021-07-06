@@ -8,18 +8,19 @@ to create the tables
 create table recipes(
     id              SERIAL PRIMARY KEY,
     name TEXT,
-    cooktimeminutes integer,
-    timeadded timestamp
+    cook_time_minutes integer,
+    time_added timestamp
 )
 ```
 ```sql
 create table ingredients(
-    recipeid   SERIAL,
+    recipe_id   SERIAL,
     ingredient text,
-    PRIMARY KEY(recipeid,ingredient),
+    PRIMARY KEY(recipe_id,ingredient),
     CONSTRAINT fk
-      FOREIGN KEY(recipeid)
+      FOREIGN KEY(recipe_id)
 	  REFERENCES recipes(id)
+      ON DELETE CASCADE
 )
 ```
 
