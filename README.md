@@ -24,7 +24,7 @@ create table ingredients(
 )
 ```
 
-.env file contents if above docekr command is used
+.env file contents if above docker command is used
 ```
 PG_USERNAME = admin
 PG_PASSWORD = admin
