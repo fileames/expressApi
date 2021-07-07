@@ -1,8 +1,24 @@
+## Running
+
+To run:
+```bash
+yarn start
+```
+
+### Documentation
+
+Api documentation using Postman can be found [here](https://documenter.getpostman.com/view/10799193/Tzm3py1U#ed2103c1-5c8f-4366-b80b-5ee4f7814817)
+
+
+## Preparation
+
+### Docker
 docker command to create postgresql database
 ```bash
 docker run --name postgres -p 32772:5432 --env POSTGRES_PASSWORD=admin --env POSTGRES_USER=admin --env POSTGRES_DB=demo postgres
 ```
 
+### Database
 to create the tables
 ```sql
 create table recipes(
@@ -24,6 +40,7 @@ create table ingredients(
 )
 ```
 
+### Environment
 .env file contents if above docker command is used
 ```
 PG_USERNAME = admin
