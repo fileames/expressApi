@@ -8,6 +8,7 @@ const schemas = {
   }),
   validateRecipeId: Joi.number().integer().min(1),
   validateUpdateRecipe: Joi.object().keys({
+    id: Joi.number().integer().min(1).required(),
     name: Joi.string().min(3).max(100).optional(),
     cook_time_minutes: Joi.number().integer().optional(),
     ingredients: Joi.array().items(Joi.string().min(3).max(50).lowercase()).optional(),

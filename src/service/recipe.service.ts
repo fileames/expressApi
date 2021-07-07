@@ -1,84 +1,98 @@
-import * as express from "express";
 import RecipeRepository from "../repository/recipe.repository";
 import RecipeDb from "../dto/recipe";
+import RecipeWithIng from "../dto/recipe_with_ingredients";
 import AddRecipe from "../dto/add_recipe";
-import AddRecipeWithTime from "../dto/add_recipe_with_time";
 import UpdateRecipe from "../dto/update_recipe";
 
 class RecipeService {
-  recipes: object[];
   recipeRepository: RecipeRepository;
 
   constructor() {
-    console.log("service constuctor");
     this.recipeRepository = new RecipeRepository();
-    this.recipes = [];
   }
 
-  async listRecipes(): Promise<RecipeDb[]> {
+  async listRecipes(): Promise<RecipeWithIng[]> {
     return new Promise((resolve, reject) => {
-      try {
-        this.recipeRepository.listRecipes().then((res) => {
-          return resolve(res);
-        });
-      } catch (err) {
-        reject(err);
-      }
+
+      this.recipeRepository.listRecipes().then((res) => {
+        return resolve(res);
+      });
+
     });
   }
 
-  async getRecipeById(recipe_id: number): Promise<RecipeDb> {
+  async getRecipeById(recipe_id: number): Promise<RecipeWithIng> {
     return new Promise((resolve, reject) => {
-      try {
-        this.recipeRepository.getRecipeById(recipe_id)
-        .then((res) => {
-          return resolve(res);
-        }).catch((err)=>{
-          reject(err);
-        });
-      } catch (err) {
+
+      this.recipeRepository.getRecipeById(recipe_id)
+      .then((res) => {
+        return resolve(res);
+      }).catch((err)=>{
         reject(err);
-      }
+      });
+    
     });
   }
 
-  async updateRecipe(recipe_id: number, recipe: UpdateRecipe): Promise<RecipeDb> {
+  async updateRecipe(recipe: UpdateRecipe): Promise<RecipeWithIng> {
     return new Promise((resolve, reject) => {
-      try {
-        this.recipeRepository.updateRecipe(recipe_id, recipe)
-        .then((res) => {
-          return resolve(res);
-        }).catch((err)=>{
-          reject(err);
-        });
-      } catch (err) {
+
+      this.recipeRepository.updateRecipe(recipe)
+      .then(async (recipe_on_db) => {
+        console.log(recipe_on_db)
+        console.log(recipe.ingredients)
+
+        if(recipe.ingredients){
+          this.recipeRepository.deleteIngredientsOfRecipe(recipe.id)
+          .then((_)=>{
+
+            if( recipe.ingredients.length > 0){
+              this.recipeRepository.addIngredients(recipe.id, recipe.ingredients)
+                .then((ingredients) => {
+                  resolve({...recipe_on_db, ingredients: ingredients} as RecipeWithIng);
+                })
+            }else{
+                resolve({...recipe_on_db, ingredients: recipe.ingredients} as RecipeWithIng);
+            }
+            
+          })
+        }
+        else{
+          const recipeOnBd = await this.getRecipeById(recipe_on_db.id);
+          resolve(recipeOnBd);
+        }
+        
+      }).catch((err)=>{
         reject(err);
-      }
+      });
+
     });
   }
 
   async deleteRecipeById(recipe_id: number): Promise<Boolean> {
     return new Promise((resolve, reject) => {
-      try {
-        this.recipeRepository.deleteRecipeById(recipe_id).then((res) => {
-          return resolve(res);
-        }).catch((err)=>{
-          reject(err);
-        });
-      } catch (err) {
+ 
+      this.recipeRepository.deleteRecipeById(recipe_id).then((res) => {
+        return resolve(res);
+      }).catch((err)=>{
         reject(err);
-      }
+      });
+
     });
   }
 
-  async addRecipe(recipe: AddRecipe): Promise<RecipeDb> {
+  async addRecipe(recipe: AddRecipe): Promise<RecipeWithIng> {
     return new Promise((resolve, reject) => {
       try {
-        const recipeReq = {...recipe}
-        recipeReq["time_added"] = new Date(Date.now()).toISOString();
+        
+        recipe.time_added = new Date(Date.now()).toISOString();
 
-        this.recipeRepository.addRecipe(recipeReq as AddRecipeWithTime).then((res) => {
-          return resolve(res);
+        this.recipeRepository.addRecipe(recipe).then((recipe_on_db) => {
+          this.recipeRepository.addIngredients(recipe_on_db.id, recipe.ingredients).then((ingredients)=>{
+            resolve({...recipe_on_db, ingredients: ingredients} as RecipeWithIng);
+          })
+        }).catch((err) => {
+          reject(err);
         });
 
       } catch (err) {

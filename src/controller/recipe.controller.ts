@@ -97,24 +97,20 @@ class RecipeController extends BaseController {
     const recipe_id = req.params.recipe_id;
     const { body } = req;
 
-    console.log(recipe_id)
-    console.log(body)
+    const validateObj = req.body;
+    validateObj.id = recipe_id;
 
     schemas.validateUpdateRecipe
-      .validateAsync(body)
+      .validateAsync(validateObj)
       .then((validatedRecipe) => {
-        schemas.validateRecipeId.validateAsync(recipe_id)
-        .then((validatedId) => {
             this.recipeService
-              .updateRecipe(validatedId, validatedRecipe)
+              .updateRecipe(validatedRecipe)
               .then((recipe) => {
                 return res.status(200).send(recipe);
               })
               .catch((err) => {
                 next(err);
               });
-        })
-        
       })
       .catch((err: Joi.ValidationError) => {
         next(new ValidationError(err.message));

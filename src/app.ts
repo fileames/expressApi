@@ -1,14 +1,12 @@
 import express from "express";
-import * as http from "http";
 import cors from "cors";
 import errorHandler from "./middleware/error.middleware"
-
+import KnexDB from "./db/knex";
 import recipeController from "./controller/recipe.controller";
 
 class RecipeApp {
   app: express.Application;
   appRouter: express.Router;
-  //server: http.Server;
 
   constructor() {
     this.app = express();
@@ -20,6 +18,7 @@ class RecipeApp {
       try {
         this.appConfig();
         this.routeConfig();
+        KnexDB.init();
       } catch (error) {
         console.log(error);
       } finally {

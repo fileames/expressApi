@@ -1,9 +1,7 @@
 import Knex from "knex";
 import config from "../config";
-//import knexConf from "../../knexfile.js";
-//import { rejects } from "assert";
 
-export class KnexDB {
+class KnexDB {
   db!: Knex;
   private initialized: boolean;
   private knexConfig: Knex.Config;

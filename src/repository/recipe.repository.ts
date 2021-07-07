@@ -1,8 +1,8 @@
-import * as express from "express";
 import { DatabaseError, RecipeNotFoundError } from "../common/htttp-exception";
 import KnexDB from "../db/knex";
-import AddRecipeWithTime from "../dto/add_recipe_with_time";
+import AddRecipe from "../dto/add_recipe";
 import RecipeDb from "../dto/recipe";
+import RecipeWithIng from "../dto/recipe_with_ingredients";
 import UpdateRecipe from "../dto/update_recipe";
 
 class RecipeRepository {
@@ -10,10 +10,9 @@ class RecipeRepository {
 
   constructor() {
     this.recipeDB = KnexDB;
-    this.recipeDB.init();
   }
 
-  async listRecipes(): Promise<RecipeDb[]> {
+  async listRecipes(): Promise<RecipeWithIng[]> {
     return new Promise((resolve, reject) => {
       this.recipeDB.db
         .select("id", "name", "cook_time_minutes", "time_added",
@@ -27,41 +26,51 @@ class RecipeRepository {
         .then((result) => {
           resolve(result);
         })
-        .catch((err) => {
+        .catch((_) => {
           reject(new DatabaseError());
         });
     });
   }
 
-  async addRecipe(recipe: AddRecipeWithTime): Promise<RecipeDb> {
+  async addIngredients(recipe_id: number, ingredients: string[]): Promise<string[]>{
     return new Promise(async (resolve, reject) => {
-      await this.recipeDB
+
+      const ingredientsToInsert = ingredients.map((elem) => {
+        return { recipe_id: recipe_id, ingredient: elem };
+      });
+      this.recipeDB
+        .db("ingredients")
+        .insert(ingredientsToInsert)
+        .returning("ingredients.ingredient")
+        .then((resultIng) => {
+          resolve(resultIng);
+        })
+        .catch((_) => {
+          reject(new DatabaseError());
+        });
+      })
+
+  }
+  
+
+  async addRecipe(recipe: AddRecipe): Promise<RecipeDb> {
+    return new Promise(async (resolve, reject) => {
+       this.recipeDB
         .db("recipes")
         .insert(
-          {name: recipe.name, cook_time_minutes: recipe.cook_time_minutes, time_added: recipe.time_added},
-          "id"
+          {name: recipe.name, cook_time_minutes: recipe.cook_time_minutes, time_added: recipe.time_added}
         )
+        .returning("*")
         .then((result) => {
-          const ingredientsToInsert = recipe.ingredients.map((elem) => {
-            return { recipe_id: result[0], ingredient: elem };
-          });
-          this.recipeDB
-            .db("ingredients")
-            .insert(ingredientsToInsert)
-            .then((_) => {
-              console.log("returning");
-              const resultRecipe = Object.assign({ id: result[0] }, recipe);
-              resolve(resultRecipe as RecipeDb);
-            });
+          resolve(result[0]);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((_) => {
           reject(new DatabaseError());
         });
     });
   }
 
-  async getRecipeById(recipe_id: number): Promise<RecipeDb> {
+  async getRecipeById(recipe_id: number): Promise<RecipeWithIng> {
     return new Promise((resolve, reject) => {
       this.recipeDB
         .db("recipes")
@@ -80,7 +89,7 @@ class RecipeRepository {
           }
           reject(new RecipeNotFoundError());
         })
-        .catch((err) => {
+        .catch((_) => {
           reject(new DatabaseError());
         });
     });
@@ -100,57 +109,47 @@ class RecipeRepository {
             reject(new RecipeNotFoundError());
           }
         })
-        .catch((err) => {
+        .catch((_) => {
           reject(new DatabaseError());
         });
     });
   }
 
-  async updateRecipe(recipe_id: number, recipe: UpdateRecipe): Promise<RecipeDb> {
+  async deleteIngredientsOfRecipe(recipe_id: number): Promise<Boolean>{
+    return new Promise((resolve, reject) => {
+      this.recipeDB
+        .db("ingredients")
+        .where("ingredients.recipe_id", recipe_id)
+        .del()
+        .then((_) => {
+          resolve(true)
+        })
+        .catch((_)=>{
+          reject(new DatabaseError());
+        })
+    });
+  }
+
+  async updateRecipe(recipe: UpdateRecipe): Promise<RecipeDb> {
     // Ingredient update
     return new Promise((resolve, reject) => {
-      const newIngredientsOfRecipe = recipe.ingredients || null;
-      delete recipe.ingredients;
+
+      const recipeOnDb = {...recipe};
+      delete recipeOnDb.ingredients;
 
       this.recipeDB
         .db("recipes")
-        .where("recipes.id", recipe_id)
-        .update(recipe, ["id", "name", "cook_time_minutes", "time_added"])
+        .where("recipes.id", recipe.id)
+        .update(recipeOnDb, ["id", "name", "cook_time_minutes", "time_added"])
         .then((updated) => {
 
           if (updated[0]) {
-            if (newIngredientsOfRecipe != null) {
-
-              this.recipeDB
-                .db("ingredients")
-                .where("ingredients.recipe_id", recipe_id)
-                .del()
-                .then((res) => {
-
-                  const ingredientsToInsert = newIngredientsOfRecipe.map(
-                    (elem) => {
-                      return { recipe_id: recipe_id, ingredient: elem };
-                    }
-                  );
-                  return this.recipeDB.db("ingredients").insert(ingredientsToInsert);
-
-                })
-                .then((_) => {
-                  return this.getRecipeById(recipe_id);
-                })
-                .then((res) => {
-                  resolve(res);
-                });
-            } else {
-              this.getRecipeById(recipe_id).then((res) => {
-                resolve(res);
-              });
-            }
+            resolve(updated[0]);
           } else {
             return reject(new RecipeNotFoundError());
           }
         })
-        .catch((err) => {
+        .catch((_) => {
           reject(new DatabaseError());
         });
     });
