@@ -16,6 +16,8 @@ class RecipeService {
 
       this.recipeRepository.listRecipes().then((res) => {
         return resolve(res);
+      }).catch((err) => {
+        reject(err);
       });
 
     });
@@ -39,8 +41,6 @@ class RecipeService {
 
       this.recipeRepository.updateRecipe(recipe)
       .then(async (recipe_on_db) => {
-        console.log(recipe_on_db)
-        console.log(recipe.ingredients)
 
         if(recipe.ingredients){
           this.recipeRepository.deleteIngredientsOfRecipe(recipe.id)
@@ -88,7 +88,8 @@ class RecipeService {
         recipe.time_added = new Date(Date.now()).toISOString();
 
         this.recipeRepository.addRecipe(recipe).then((recipe_on_db) => {
-          this.recipeRepository.addIngredients(recipe_on_db.id, recipe.ingredients).then((ingredients)=>{
+          this.recipeRepository.addIngredients(recipe_on_db.id, recipe.ingredients)
+          .then((ingredients)=>{
             resolve({...recipe_on_db, ingredients: ingredients} as RecipeWithIng);
           })
         }).catch((err) => {

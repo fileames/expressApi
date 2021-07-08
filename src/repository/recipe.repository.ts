@@ -80,16 +80,16 @@ class RecipeRepository {
           )
         )
         .from("recipes")
+        .where("recipes.id", recipe_id)
         .leftJoin("ingredients", "recipes.id", "ingredients.recipe_id")
         .groupBy("recipes.id")
-        .where("recipes.id", recipe_id)
         .then((recipe) => {
           if (recipe[0]) {
             resolve(recipe[0]);
           }
           reject(new RecipeNotFoundError());
         })
-        .catch((_) => {
+        .catch((err) => {
           reject(new DatabaseError());
         });
     });
@@ -102,7 +102,6 @@ class RecipeRepository {
         .where("recipes.id", recipe_id)
         .del()
         .then((numOfDeleted) => {
-          console.log(numOfDeleted);
           if (numOfDeleted != 0) {
             resolve(true);
           } else {

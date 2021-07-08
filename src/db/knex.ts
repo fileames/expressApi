@@ -15,7 +15,6 @@ class KnexDB {
     return new Promise((resolve, reject) => {
       try {
         console.log("Knex init");
-        console.log(config.PASSWORD);
         if (this.initialized) {
           return resolve(true);
         }

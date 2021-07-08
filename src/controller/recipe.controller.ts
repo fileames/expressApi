@@ -61,8 +61,6 @@ class RecipeController extends BaseController {
             return res.status(200).send(recipe);
           })
           .catch((err) => {
-            console.log("ERR")
-            console.log(err)
             next(err);
           });
       })
@@ -118,7 +116,6 @@ class RecipeController extends BaseController {
   }
 
   initializeRoutes() {
-    console.log("route init");
     this.router.get("/", this.listRecipes.bind(this));
     this.router.post("/", this.addRecipe.bind(this));
     this.router.get("/:recipe_id", this.getRecipe.bind(this));
