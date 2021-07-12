@@ -26,8 +26,8 @@ class RecipeRepository {
         .then((result) => {
           resolve(result);
         })
-        .catch((_) => {
-          reject(new DatabaseError());
+        .catch((err) => {
+          reject(new DatabaseError(err));
         });
     });
   }
@@ -45,8 +45,8 @@ class RecipeRepository {
         .then((resultIng) => {
           resolve(resultIng);
         })
-        .catch((_) => {
-          reject(new DatabaseError());
+        .catch((err) => {
+          reject(new DatabaseError(err));
         });
       })
 
@@ -64,8 +64,8 @@ class RecipeRepository {
         .then((result) => {
           resolve(result[0]);
         })
-        .catch((_) => {
-          reject(new DatabaseError());
+        .catch((err) => {
+          reject(new DatabaseError(err));
         });
     });
   }
@@ -90,7 +90,7 @@ class RecipeRepository {
           reject(new RecipeNotFoundError());
         })
         .catch((err) => {
-          reject(new DatabaseError());
+          reject(new DatabaseError(err));
         });
     });
   }
@@ -108,8 +108,8 @@ class RecipeRepository {
             reject(new RecipeNotFoundError());
           }
         })
-        .catch((_) => {
-          reject(new DatabaseError());
+        .catch((err) => {
+          reject(new DatabaseError(err));
         });
     });
   }
@@ -123,8 +123,8 @@ class RecipeRepository {
         .then((_) => {
           resolve(true)
         })
-        .catch((_)=>{
-          reject(new DatabaseError());
+        .catch((err)=>{
+          reject(new DatabaseError(err));
         })
     });
   }
@@ -148,8 +148,8 @@ class RecipeRepository {
             return reject(new RecipeNotFoundError());
           }
         })
-        .catch((_) => {
-          reject(new DatabaseError());
+        .catch((err) => {
+          reject(new DatabaseError(err));
         });
     });
   }

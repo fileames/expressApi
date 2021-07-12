@@ -49,10 +49,10 @@ class RecipeService {
             if( recipe.ingredients.length > 0){
               this.recipeRepository.addIngredients(recipe.id, recipe.ingredients)
                 .then((ingredients) => {
-                  resolve({...recipe_on_db, ingredients: ingredients} as RecipeWithIng);
+                  resolve({...recipe_on_db, ingredients: ingredients});
                 })
             }else{
-                resolve({...recipe_on_db, ingredients: recipe.ingredients} as RecipeWithIng);
+                resolve({...recipe_on_db, ingredients: recipe.ingredients});
             }
             
           })
@@ -83,22 +83,19 @@ class RecipeService {
 
   async addRecipe(recipe: AddRecipe): Promise<RecipeWithIng> {
     return new Promise((resolve, reject) => {
-      try {
         
         recipe.time_added = new Date(Date.now()).toISOString();
 
         this.recipeRepository.addRecipe(recipe).then((recipe_on_db) => {
           this.recipeRepository.addIngredients(recipe_on_db.id, recipe.ingredients)
           .then((ingredients)=>{
-            resolve({...recipe_on_db, ingredients: ingredients} as RecipeWithIng);
+            resolve({...recipe_on_db, ingredients: ingredients});
           })
         }).catch((err) => {
           reject(err);
         });
 
-      } catch (err) {
-        reject(err);
-      }
+  
     });
   }
 }
