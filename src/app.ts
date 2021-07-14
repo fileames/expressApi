@@ -18,19 +18,18 @@ class RecipeApp {
       try {
         this.appConfig();
         this.routeConfig();
-        KnexDB.init();
+        KnexDB.init()
+          .then((_)=>{
+            this.app.use(errorHandler);
+            console.log("Configured App");
+            resolve(true);
+          }).catch((err)=>{
+            reject(err);
+          });
       } catch (error) {
-        console.log(error);
-      } finally {
-        this.app.use(errorHandler);
-        console.log("Configured App");
-        resolve(true);
-      }
-    }).catch((err: Error) => {
-      console.log(err);
-      console.log("Not able to launch.");
-      process.exit(1);
-    });
+        reject(error);
+      } 
+    })
   }
 
   private routeConfig() {

@@ -16,7 +16,7 @@ class KnexDB {
       try {
         console.log("Knex init");
         if (this.initialized) {
-          return resolve(true);
+          resolve(true);
         }
         this.knexConfig = {
           client: "pg",
@@ -35,11 +35,16 @@ class KnexDB {
 
         this.db = Knex(this.knexConfig);
 
-        const resultT = this.db.raw("select 1 = 1");
-        this.initialized = true;
-        resolve(true);
+        const resultT =  this.db.raw("select 1 = 1")
+          .then((_) => {
+            this.initialized = true;
+            resolve(true);
+          }).catch((err)=>{
+            return reject(err);
+          });
+        
       } catch (err) {
-        reject(err);
+        return reject(err);
       }
     });
   }
